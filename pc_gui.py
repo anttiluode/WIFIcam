@@ -80,7 +80,7 @@ class ScrollPanel(tk.Frame):
 class WIFIcamGUI:
     def __init__(self, root: tk.Tk):
         self.root = root
-        root.title(APPNAME + ' — Galaxy Camera2 control')
+        root.title(APPNAME + ' — Wireless Camera Control')
         root.geometry('1370x870')
         root.minsize(1050, 680)
         root.configure(bg=COL['bg'])
