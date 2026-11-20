@@ -1,29 +1,40 @@
-WIFIcam Desktop — Galaxy S20 camera control on Windows
-=====================================================
+WIFIcam Desktop — wireless Android camera control on Windows
+=============================================================
 
-FIRST TIME (Windows 10/11):
-1. Download or clone this repository to e.g. E:\DocsHouse\1068\WIFIcam.
-2. Double-click INSTALL_GUI.bat once to install Pillow (JPEG preview).
-3. Double-click LAUNCH_GUI.bat.
-4. Open WIFIcam on the S20, keep the phone awake and on the same Wi-Fi.
-5. Paste its COMPLETE URL, including ?token=..., into the top field.
-6. Click Connect. The URL is saved for subsequent launches in your
-   user profile at %APPDATA%\WIFIcam\desktop.json.
+GET STARTED (Windows 10/11):
+1. Download the repository ZIP from https://github.com/anttiluode/WIFIcam
+   and extract it, or clone the repository.
+2. Have Python 3.13 installed (the included .bat files use python3.13).
+3. Double-click INSTALL_GUI.bat once to install Pillow for JPEG preview.
+4. Double-click LAUNCH_GUI.bat to open the desktop camera controller.
+5. On your Android phone, install WIFIcam (app-debug.apk in the repo).
+6. Connect phone and PC to the same Wi-Fi, open WIFIcam on the phone,
+   and keep it awake with WIFIcam in the foreground.
+7. Tap Copy control URL on the phone, paste the COMPLETE http:// URL
+   including ?token=... into the Windows GUI, and click Connect.
+
+Download Android APK:
+https://raw.githubusercontent.com/anttiluode/WIFIcam/main/app-debug.apk
 
 Features:
-- Live preview from /snapshot, display-only rotation
-- Enumerate logical/physical Camera2 cameras
-- Hardware-available zoom limits and quick 0.5x, 1x, 2x, 3x, 5x controls
-- Manual and autofocus, focus slider and metric-distance presets
-- ISO, exposure time (microseconds) and AE lock
-- White balance mode and lock, torch
-- Preview JPEG quality, full-resolution still JPEG, burst captures
-- Save-folder picker and reported sensor capabilities
+- Live preview from /snapshot with display-only rotation
+- Selection of available logical/physical Camera2 cameras
+- Supported zoom range and quick 0.5x, 1x, 2x, 3x, 5x controls
+- Manual focus/autofocus, focus-distance slider and presets
+- ISO, shutter time (microseconds) and auto-exposure lock
+- White balance modes and lock, torch/LED when supported
+- Preview JPEG quality, full-resolution still photos and burst captures
+- Save-folder picker and camera capability information
 
-This PC GUI talks to the existing phone app. NO NEW APK is required.
-The smartphone must remain awake with WIFIcam in the foreground.
-Available lenses and manual controls depend on Samsung Camera2 firmware.
+Alternatively, paste the same URL into a Windows web browser to use
+the built-in control panel without the Python desktop GUI.
+
+The desktop GUI needs Python 3.13 and Pillow; it is not a Windows EXE.
+The phone must remain awake with WIFIcam in the foreground.
+Manual settings, lenses and zoom availability depend on Android Camera2
+support and the phone maker's camera firmware.
 Focus 0 diopters is infinity; 2 D is nominally 50 cm.
-The Camera2 /api/set response means queued, not independently measured.
-The saved URL contains your access token: keep the config file private
-and never expose port 8765 to the internet.
+The /api/set response means the setting was queued, not independently
+verified as applied by the hardware.
+The GUI stores the URL at %APPDATA%\WIFIcam\desktop.json.
+Keep that URL and its token private. Do not expose port 8765 to the internet.
