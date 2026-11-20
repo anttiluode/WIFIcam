@@ -36,7 +36,7 @@ public class MainActivity extends Activity {
         layout.setPadding(38, 50, 38, 30);
         layout.setBackgroundColor(Color.rgb(16, 21, 32));
         TextView title = new TextView(this);
-        title.setText("WIFIcam  |  Camera2 lab");
+        title.setText("WIFIcam  |  Wireless camera");
         title.setTextSize(27);
         title.setTextColor(Color.WHITE);
         layout.addView(title);
@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
     private static final String TOKEN_KEY = "control_token";
 
     /**
-     * A camera calibration session must survive activity recreation.
+     * The camera access URL should survive activity recreation.
      * Keep the 160-bit LAN access token stable until app data is cleared.
      */
     private String getOrCreateToken() {
@@ -100,7 +100,7 @@ public class MainActivity extends Activity {
             server.start();
             String ip = findLocalIp();
             link = "http://" + ip + ":8765/?token=" + token;
-            status.setText("Camera server running\n\n" + link + "\n\nOpen this address in your Windows browser.\nCamera starts when permission is granted.");
+            status.setText("Camera server running\n\n" + link + "\n\nOpen this address in WIFIcam Desktop or a Windows browser.\nCamera starts when permission is granted.");
             engine.startDefault();
         } catch (Exception e) {
             status.setText("Cannot start WIFIcam: " + e.getMessage());
