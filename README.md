@@ -1,6 +1,6 @@
 # WIFIcam — turn an Android phone into a controllable scientific camera
 
-![webcam](wecbcam.png)
+![webcam](webcam.png)
 
 A **native Android Camera2** camera server. Open a browser on a Windows computer and control the phone's cameras over local Wi-Fi. Designed for Galaxy S20 optical experiments, but supports Android 9+ devices which expose Camera2.
 
