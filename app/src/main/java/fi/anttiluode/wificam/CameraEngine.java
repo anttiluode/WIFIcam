@@ -323,7 +323,7 @@ public final class CameraEngine {
         }
         if (still) {
             b.set(CaptureRequest.JPEG_QUALITY, (byte)95);
-            b.set(CaptureRequest.JPEG_ORIENTATION, 0); // Sensor-native orientation for calibration.
+            b.set(CaptureRequest.JPEG_ORIENTATION, 0); // Preserve the camera sensor's original image orientation.
         }
     }
 
