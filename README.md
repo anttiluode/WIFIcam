@@ -14,8 +14,6 @@ WIFIcam is a lightweight Android app with a local Wi-Fi camera server. Watch the
 
 **[⬇ Download WIFIcam APK for Android](https://raw.githubusercontent.com/anttiluode/WIFIcam/main/app-debug.apk)**
 
-![pic2](phone.jpg)
-
 The APK is available in this repository as [`app-debug.apk`](app-debug.apk). Open the download link on your Android phone, then tap the APK to install. Android may ask you to allow installs from your browser or Files app. Grant Camera permission when WIFIcam starts.
 
 > This is a **debug-signed APK for direct installation**, not a Play Store build. A successful [Android build](https://github.com/anttiluode/WIFIcam/actions/workflows/android.yml) automatically refreshes the APK in `main`. If a build is still running, you can also download the `WIFIcam-debug-apk` ZIP artifact from the latest successful workflow run and extract the APK. Debug builds from different runs may use different signing keys; if Android rejects an update, uninstall the previous debug build before installing the new one (uninstalling resets the saved token).
