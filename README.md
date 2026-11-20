@@ -1,112 +1,89 @@
-# WIFIcam — turn an Android phone into a controllable scientific camera
+# WIFIcam
 
-![webcam](webcam.png)
+**Use an Android phone as a wireless camera, with full control from a Windows PC.**
 
-A **native Android Camera2** camera server. Open a browser on a Windows computer and control the phone's cameras over local Wi-Fi. Designed for Galaxy S20 optical experiments, but supports Android 9+ devices which expose Camera2.
+WIFIcam is a lightweight Android app with a local Wi-Fi camera server. Watch the live preview, switch available cameras, adjust zoom, focus, ISO, shutter speed and white balance, and save photos from either the **WIFIcam Desktop GUI** or a web browser.
 
-**No root, cloud account, subscription, extra web service, or external Android libraries.** All data stays on your local network unless you explicitly save or share it elsewhere.
+**No cloud, subscription, account or internet connection needed.** Your phone and PC just need to be on the same Wi-Fi network.
 
-![phone](phone.jpg)
+## Download and install
 
-## What works in this first version
+### 1. Install WIFIcam on your Android phone
 
-- Discover actual public **logical camera IDs** and physical child IDs reported by the phone, including focal length metadata. Select a public camera; attempt a physical child via `0@2`, etc. Physical stream selection uses `OutputConfiguration.setPhysicalCameraId` and may be blocked by Samsung firmware or stream-combination restrictions. It will report the failure rather than pretending to switch lenses.
-- Browser-based **live MJPEG feed**, normally up to ~10 frames/sec, selectable 640 / 1280 / 1920 width ceilings. Actual resolution depends on the sensor's advertised modes; 1920 may be CPU intensive.
-- **Full-resolution still JPEGs** on `/photo` (largest supported JPEG size <= 16 MP if available), independent of preview quality.
-- Manual ISO, exposure time in microseconds, focus distance in diopters, focus/exposure automation, AE/AWB locks, available white-balance presets, torch and zoom; on Android 11+ where exposed, the logical camera uses `CONTROL_ZOOM_RATIO` for possible ultrawide/tele lens switching, with crop-based fallback on older devices.
-- Local HTTP API and zero-dependency `pc_client.py` for repeated optical calibration captures.
-- **Persistent random 160-bit access token**, generated once and stored in private Android app preferences; required for every HTTP endpoint. It survives activity restarts and app updates, and resets only when app storage is cleared or the app is uninstalled.
+**[⬇ Download WIFIcam APK for Android](https://raw.githubusercontent.com/anttiluode/WIFIcam/main/app-debug.apk)**
 
-**Caveats:** Not all Android cameras offer MANUAL_SENSOR; the UI tells you whether it is advertised. Physical child cameras are not guaranteed to be individually usable, and some selections may fail. Manual focus/ISO/exposure are requested through Camera2; actual applied metadata has not yet been verified on an S20. JPEG photos are sensor-native orientation. This app must remain **open in foreground with the screen on**; it does not operate as a background service. The stream is MJPEG over HTTP, not lossless raw, H.264, or video recording.
+The APK is already included in this repository as [`app-debug.apk`](app-debug.apk). Open the link on your Android phone, download the file, then tap the APK to install. Android may ask you to allow installs from your browser or Files app. Grant the Camera permission when WIFIcam starts.
 
-## Windows desktop control panel (NEW)
+> This is a **debug-signed APK for direct installation**, not a Play Store build. The checked-in APK is a snapshot; if Android source has changed since it was uploaded, use the latest successful build from [GitHub Actions](../../actions/workflows/android.yml) (download the `WIFIcam-debug-apk` ZIP and extract the APK).
 
-You can use the browser dashboard by opening the complete phone URL, **or** run the dedicated Tkinter GUI on Windows 10/11, with a large live preview, camera/lens dropdown, 0.5×/1×/2×/3×/5× quick zoom, manual ISO/shutter, focus slider, white balance, torch, full-resolution JPEG and burst controls.
+### 2. Control the camera from Windows
 
-1. Download or clone this repository and open the `WIFIcam` folder on Windows.
-2. Double-click **`INSTALL_GUI.bat`** once (installs Pillow for JPEG preview).
-3. Double-click **`LAUNCH_GUI.bat`** to open the desktop window.
-4. Paste the complete URL shown on the S20 (including `?token=...`) into the top field, click **Connect**. The PC GUI remembers it in `%APPDATA%\\WIFIcam\\desktop.json` (keep this private).
+**[⬇ Download the Windows GUI files (repository ZIP)](https://github.com/anttiluode/WIFIcam/archive/refs/heads/main.zip)**
 
-You do not need a new APK for the desktop GUI: it uses the current phone server and `/snapshot`, `/photo`, and `/api/set` endpoints. The preview is polled JPEG snapshots, not a raw stream. Some zoom or lens choices may be digital or unavailable depending on Camera2 and Samsung firmware. See `GUI_README.txt` for more details. No other Python dependencies beyond Pillow.
+1. Extract the ZIP on your Windows 10/11 computer.
+2. Double-click **`INSTALL_GUI.bat`** once to install the Pillow dependency. Python must already be installed on Windows.
+3. Double-click **`LAUNCH_GUI.bat`** to start the **WIFIcam Desktop** control window.
+4. Keep the WIFIcam app visible on your phone, with its screen awake, and connect the phone and PC to the same Wi-Fi.
+5. On the phone tap **Copy control URL**. Paste the **complete URL**, including `?token=...`, into the desktop GUI and click **Connect**.
 
-## Build / install
+**No desktop installation required?** Paste that same URL into a Windows web browser to use the built-in camera controls. The browser interface is part of the Android app.
 
-### Easiest: GitHub Actions APK
+## What you can control
 
-1. Open the repository **Actions** tab → **Build Android APK** → select the latest successful run (or **Run workflow**).
-2. Download the `WIFIcam-debug-apk` artifact ZIP and extract `app-debug.apk`.
-3. Transfer the APK to your S20. Allow installation from the file manager/source you used, install WIFIcam, and grant Camera permission.
-4. Connect the phone and PC to the **same Wi-Fi**, and keep WIFIcam open on the phone.
-5. The phone displays a URL such as `http://192.168.1.157:8765/?token=...`. Open **the exact URL** in your PC browser. Port `8765` is **not** IP Webcam's `8080`. The token is stable across app restarts, but the Wi-Fi IP address can still change.
+| Feature | WIFIcam Desktop / browser |
+| --- | --- |
+| Live picture | Wi-Fi preview (JPEG/MJPEG) |
+| Camera selection | Available logical cameras and reported physical lenses, when supported |
+| Zoom | Manual zoom and lens switching where Android Camera2 allows it |
+| Focus | Autofocus or manual distance |
+| Exposure | Automatic or manual ISO and shutter time |
+| White balance | Modes and lock, depending on camera support |
+| Light | Torch / LED on supported cameras |
+| Photos | Full-resolution JPEG stills, preview saves, and desktop burst capture |
+| Preview | Adjustable preview size / JPEG quality; desktop display rotation |
 
-The workflow builds a **debug APK**, not a signed Play Store release. GitHub Actions must be enabled for the repository.
+Available controls and usable lenses depend on the specific phone's Camera2 support. Some physical lenses are reported but cannot be opened directly; the app reports those limitations instead of claiming a successful switch.
 
-### Android Studio
+## See it in action
 
-Open this repository as an Android Studio project. It uses Android Gradle Plugin 8.7.3, Gradle 8.9, Java 17 and Android SDK 35, all available through Android Studio / the GitHub workflow. It has no Gradle wrapper JAR, so use an installed Gradle 8.9 or configure Android Studio to use one. `gradle assembleDebug` builds the APK.
+**Android phone app**
 
-## Python control on Windows
+![WIFIcam running on an Android phone](phone.jpg)
 
-Copy the complete URL shown on the phone (including token):
+**WIFIcam Desktop camera controls**
+
+![WIFIcam Windows GUI showing live camera and controls](webcam.png)
+
+## How it works
+
+The Android app starts a camera server on your phone, normally at port `8765`. It shows a local URL such as `http://192.168.1.157:8765/?token=YOUR_TOKEN`. Use **the URL on your own phone**; your IP address and token may differ. You can access that URL through the Windows GUI or a browser.
+
+The app needs Android 9+ (API 28) and camera permission. Keep it in the foreground with the screen awake while using it. Camera images stay on your local network unless you choose to save or share them.
+
+**Important security note:** The URL contains a private access token. WIFIcam uses unencrypted HTTP on your local network, so use a trusted Wi-Fi connection. Do not publish the URL, port-forward `8765`, or expose the camera server to the internet. The desktop GUI stores the URL at `%APPDATA%\WIFIcam\desktop.json`.
+
+## Windows GUI details
+
+Requirements: Windows 10/11, Python 3 with Tkinter, and Pillow (installed via `INSTALL_GUI.bat`). The desktop app is a Python GUI, **not** a prebuilt Windows `.exe`. Start it with `LAUNCH_GUI.bat` or run `python pc_gui.py`. For controls and setup notes, see [`GUI_README.txt`](GUI_README.txt).
+
+## Advanced: command-line and HTTP control
+
+An optional Python command-line client, [`pc_client.py`](pc_client.py), supports taking photos and setting camera controls from scripts. The URL always includes your phone's current token.
 
 ```powershell
-$cam = 'http://192.168.1.157:8765/?token=PASTE_PHONE_TOKEN_HERE'
-python3.13 pc_client.py $cam cameras
-python3.13 pc_client.py $cam state
-python3.13 pc_client.py $cam set --manual --iso 400 --shutter-us 10000 --manual-focus --focus 0
-python3.13 pc_client.py $cam photo --output calibration_0001.jpg
-python3.13 pc_client.py $cam burst --count 20 --interval 1 --dir runs\camera
+$cam = 'http://PHONE_IP:8765/?token=PASTE_YOUR_TOKEN'
+python pc_client.py $cam cameras
+python pc_client.py $cam state
+python pc_client.py $cam set --manual --iso 400 --shutter-us 10000 --manual-focus --focus 0
+python pc_client.py $cam photo --output photo.jpg
 ```
 
-**Important:** manual focus `0` means infinity, not close-up. In the phone's Camera2 convention, increasing diopters focuses closer. For a phone observing a monitor up close, experiment with a nonzero diopter value.
+Main endpoints: `GET /` (browser UI), `/api/cameras`, `/api/state`, `/stream`, `/snapshot`, `/photo`; `POST /api/camera` and `/api/set`. The server requires the `token` query parameter for all endpoints.
 
-Use the exposed camera IDs, not a guessed Samsung camera name:
+Manual focus `0` means infinity (not a nearby object); higher diopter values focus closer. A request being accepted does not guarantee a sensor physically applied every setting: supported ranges and firmware behavior differ.
 
-```powershell
-python3.13 pc_client.py $cam camera 0 --width 1280
-python3.13 pc_client.py $cam camera '0@2' --width 640
-```
+## Build the Android app yourself
 
-After switching lenses, wait for `/api/state` to report `"status": "streaming"`. On Android 11+ with a supported zoom-ratio range, try 0.5x / 1x / 3x through the logical camera to request ultrawide / wide / tele behavior. A logical camera may automatically swap lenses internally under different zoom/light conditions; choosing a reported *physical* child attempts to avoid that, but requires hardware support.
+The Android source lives under `app/`. Build it with Android Studio or Gradle 8.9, Java 17, Android Gradle Plugin 8.7.3 and SDK 35. The GitHub [Build Android APK workflow](../../actions/workflows/android.yml) builds a new debug APK when `main` changes; download its `WIFIcam-debug-apk` artifact from a successful run. If you modify the Android source, the already-committed root `app-debug.apk` **does not update automatically**.
 
-## HTTP endpoints
-
-All endpoints require `?token=PHONE_TOKEN` (for POST too):
-
-| Method | Path | Result |
-| --- | --- | --- |
-| GET | `/` | Dark browser dashboard |
-| GET | `/api/cameras` | Logical and physical camera IDs, capabilities/ranges |
-| GET | `/api/state` | Current settings, dimensions, error/status and frame counts |
-| POST | `/api/camera?id=0&width=1280` | Open camera; `width=640/1280/1920` |
-| POST | `/api/set?manualExposure=true&iso=400&shutterUs=10000` | Update requested settings |
-| GET | `/stream` | Multipart MJPEG stream |
-| GET | `/snapshot` | Latest preview JPEG |
-| GET | `/photo` | New high-resolution JPEG photo |
-
-Additional `/api/set` keys: `manualFocus`, `focus` (diopters), `zoom`, `quality` (preview JPEG 30..100), `awbMode` (Camera2 integer), `aeLock`, `awbLock`, `torch`. Response `accepted=true` means queued; verify subsequent `/api/state` and real captures. MJPEG quality is independent of still JPEG quality (95).
-
-## LightScan and reproducibility
-
-For a repeatable scanning session:
-
-1. Put the phone/monitor in a stable mount, prevent screen movement, darken the room.
-2. Check `/api/cameras` and choose a camera. A physical lens can improve repeatability **only if it is actually supported**.
-3. Try fixed focus and manual exposure + ISO. Lock white balance or choose a supported fixed mode.
-4. Record one frame from `/photo` per projected light pattern, and associate the filenames with pattern IDs and timestamps. Do not assume the JPEG represents a lossless/linear sensor reading; for linear photometry, RAW/DNG support would be a separate project.
-5. Validate capture geometry, saturation and linearity with controls before attempting inversion through the diffuser.
-
-`LightScan` can consume the HTTP JPEG bytes from `/photo` directly; unlike IP Webcam, this endpoint requests a *new still image* from Camera2 rather than a browser-cropped MJPEG frame.
-
-## Security
-
-This is a **local lab instrument**, not an internet-facing service. Keep the phone on a trusted private LAN. Access is protected by a random token, but transport uses **unencrypted HTTP**, so other devices able to intercept LAN traffic could read it. Do **not** port-forward `8765`, expose it to the internet, or paste the token into public logs/issues.
-
-## Known limitations / next experiments
-
-- Compile/runtime validation on an actual Galaxy S20 remains to be done; vendor Camera2 behavior varies.
-- Future version: capture-result metadata (measured exposure, ISO, focus, focal length), DNG/RAW where available, hardware-consistent frame timestamps, per-sensor physical still-session fallbacks, and per-channel linear calibration for LightScan.
-- The stream requires the phone to stay awake. Turning off the screen may suspend the camera or server.
-
-MIT licensed.
+MIT licensed. See [`LICENSE`](LICENSE).
