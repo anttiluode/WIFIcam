@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WIFIcam Camera2 lab</title>
+<title>WIFIcam — Wireless Camera Control</title>
 <style>
 :root{color-scheme:dark;font:15px system-ui,sans-serif;background:#0b111d;color:#e7f1ff}
 *{box-sizing:border-box}body{max-width:1450px;margin:0 auto;padding:20px}h1{margin:0 0 7px;font-size:29px;letter-spacing:.2px}h2{font-size:17px;color:#9ce4fe;margin:0 0 13px}p{color:#adc1d5;margin:8px 0 18px}main{display:grid;grid-template-columns:minmax(430px,1.65fr) minmax(310px,.95fr);gap:20px}
@@ -16,14 +16,14 @@ button{cursor:pointer;background:#126c99;border-color:#138dc5;font-weight:600;ma
 input[type=range]{width:100%;accent-color:#43c5ff}a{color:#66ccf7}
 @media(max-width:920px){main{grid-template-columns:1fr}body{padding:12px}}
 </style></head><body>
-<h1>WIFIcam <span style="color:#5dc6f8">/ Camera2 lab</span></h1>
-<p>Galaxy S20 and other Android Camera2 phones. Direct camera control over local Wi-Fi. Full-resolution JPEG, MJPEG and script endpoints.</p>
+<h1>WIFIcam <span style="color:#5dc6f8">/ Wireless camera control</span></h1>
+<p>Control your Android phone camera over local Wi-Fi. Live preview, zoom, focus, exposure, white balance and full-resolution photos.</p>
 <main><section>
 <div class="panel"><h2>Live camera</h2><div class="camera-frame"><img id="video" alt="Waiting for live camera image"></div>
 <div><button id="shot">Save full-resolution JPEG</button><button id="previewshot">Save preview JPEG</button><button id="reconnect">Reconnect stream</button></div>
 <label>Image orientation (preview only)</label><select id="rotation"><option value="0">0° sensor-native</option><option value="90">90° clockwise</option><option value="180">180°</option><option value="270">270° clockwise</option></select>
 <div id="status">Connecting…</div><div id="error"></div></div>
-<div class="panel"><h2>External automation</h2><p class="small">Keep this URL private: it contains a random access token. Your computer can use the same token for all local endpoints.</p>
+<div class="panel"><h2>Connect other software</h2><p class="small">Keep this URL private: it contains a random access token. Your computer can use the same token for all local endpoints.</p>
 <code class="small">GET /api/cameras, /api/state, /stream, /photo, /snapshot<br>POST /api/camera?id=...&amp;width=1280<br>POST /api/set?manualExposure=true&amp;iso=400&amp;shutterUs=10000</code></div>
 </section><section><div class="panel"><h2>Camera &amp; sensor</h2>
 <label>Available cameras</label><select id="camera"></select>
