@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WIFIcam Camera2 lab</title>
+<style>
+:root{color-scheme:dark;font:15px system-ui,sans-serif;background:#0b111d;color:#e7f1ff}
+*{box-sizing:border-box}body{max-width:1450px;margin:0 auto;padding:20px}h1{margin:0 0 7px;font-size:29px;letter-spacing:.2px}h2{font-size:17px;color:#9ce4fe;margin:0 0 13px}p{color:#adc1d5;margin:8px 0 18px}main{display:grid;grid-template-columns:minmax(430px,1.65fr) minmax(310px,.95fr);gap:20px}
+.panel{background:#131e2f;border:1px solid #2b3a50;border-radius:15px;padding:20px;margin-bottom:16px}
+#video{display:block;background:#030609;width:100%;max-height:75vh;object-fit:contain;min-height:250px;transform-origin:center}
+.camera-frame{overflow:hidden;border-radius:9px;background:#000}label{display:block;font-size:13px;color:#b8d0e1;margin:13px 0 6px}
+input,select,button{background:#091324;color:#e6f1fb;border:1px solid #405572;border-radius:7px;padding:9px 11px;font:inherit}
+input[type=checkbox]{width:18px;height:18px;vertical-align:middle;accent-color:#40b9ee}input[type=number],select{width:100%}
+button{cursor:pointer;background:#126c99;border-color:#138dc5;font-weight:600;margin:6px 6px 5px 0}button:hover{filter:brightness(1.13)}button:disabled{opacity:.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.full{grid-column:1/-1}
+.check{display:flex;align-items:center;gap:9px;margin-top:14px;color:#d9e8f5}
+.small{font-size:12px;color:#93aabf}#status{white-space:pre-wrap;overflow-wrap:anywhere}#error{color:#ffbd9f;white-space:pre-wrap}#info{font:12px/1.5 ui-monospace,monospace;color:#9bcee5;white-space:pre-wrap}
+input[type=range]{width:100%;accent-color:#43c5ff}a{color:#66ccf7}
+@media(max-width:920px){main{grid-template-columns:1fr}body{padding:12px}}
+</style></head><body>
+<h1>WIFIcam <span style="color:#5dc6f8">/ Camera2 lab</span></h1>
+<p>Galaxy S20 and other Android Camera2 phones. Direct camera control over local Wi-Fi. Full-resolution JPEG, MJPEG and script endpoints.</p>
+<main><section>
+<div class="panel"><h2>Live camera</h2><div class="camera-frame"><img id="video" alt="Waiting for live camera image"></div>
+<div><button id="shot">Save full-resolution JPEG</button><button id="previewshot">Save preview JPEG</button><button id="reconnect">Reconnect stream</button></div>
+<label>Image orientation (preview only)</label><select id="rotation"><option value="0">0° sensor-native</option><option value="90">90° clockwise</option><option value="180">180°</option><option value="270">270° clockwise</option></select>
+<div id="status">Connecting…</div><div id="error"></div></div>
+<div class="panel"><h2>External automation</h2><p class="small">Keep this URL private: it contains a random access token. Your computer can use the same token for all local endpoints.</p>
+<code class="small">GET /api/cameras, /api/state, /stream, /photo, /snapshot<br>POST /api/camera?id=...&amp;width=1280<br>POST /api/set?manualExposure=true&amp;iso=400&amp;shutterUs=10000</code></div>
+</section><section><div class="panel"><h2>Camera &amp; sensor</h2>
+<label>Available cameras</label><select id="camera"></select>
+<label>MJPEG stream resolution limit</label><select id="width"><option value="640">640 wide (fast)</option><option selected value="1280">1280 wide</option><option value="1920">1920 wide (CPU-heavy)</option></select>
+<button id="switch">Open selected camera</button><div id="info"></div></div>
+<div class="panel"><h2>Exposure, optics, color</h2>
+<div class="grid">
+<label class="check"><input id="manualExposure" type="checkbox"> Manual exposure</label>
+<label class="check"><input id="aeLock" type="checkbox"> Lock auto exposure</label>
+<div><label>ISO</label><input id="iso" type="number" min="50" max="6400" step="1" value="400"></div>
+<div><label>Shutter (microseconds)</label><input id="shutterUs" type="number" min="50" max="1000000" step="100" value="10000"></div>
+<label class="check full"><input id="manualFocus" type="checkbox"> Manual focus</label>
+<div class="full"><label>Focus distance (diopters, 0 = infinity)</label><input id="focus" type="range" min="0" max="10" step="0.05" value="0"><span class="small" id="focusVal">0.00</span></div>
+<div class="full"><label>Camera zoom / optical lens switching when available</label><input id="zoom" type="range" min="1" max="8" step="0.05" value="1"><span class="small" id="zoomVal">1.00x</span></div>
+<div class="full"><label>White balance mode</label><select id="awbMode"><option value="1">Auto</option><option value="5">Daylight</option><option value="6">Cloudy daylight</option><option value="2">Incandescent</option><option value="3">Fluorescent</option><option value="4">Warm fluorescent</option><option value="7">Twilight</option><option value="8">Shade</option></select></div>
+<label class="check"><input id="awbLock" type="checkbox"> Lock auto white balance</label>
+<label class="check"><input id="torch" type="checkbox"> Torch</label>
+<div class="full"><label>MJPEG quality</label><input id="quality" type="range" min="30" max="100" step="1" value="85"><span class="small" id="qualityVal">85</span></div>
+</div><button id="apply">Apply controls</button><p class="small">Manual exposure works only on Camera2 sensors advertising MANUAL_SENSOR. Fixed white balance modes are available only when advertised by the selected camera.</p></div>
+</section></main>
+<script>
+'use strict';
+const token = new URL(location.href).searchParams.get('token') || '';
+const q = (path, params={}) => path + '?' + new URLSearchParams({...params,token}).toString();
+const $ = id => document.getElementById(id);
+let cameras = [], haveLoaded = false, currentSelection = '';
+function err(e){ $('error').textContent=String(e.message || e); }
+async function api(path, args={}, method='GET') {
+ const r = await fetch(q(path,args),{method,cache:'no-store'});
+ if (!r.ok) throw new Error(path+': '+await r.text());
+ return r.json();
+}
+function reconnect(){ $('video').src=q('/stream',{t:Date.now()}); }
+function updateCameraInfo() {
+ const cam=cameras.find(c=>c.id===$('camera').value);
+ if(!cam) return;
+ $('info').textContent = `Sensor: ${cam.id}\nManual ISO/shutter: ${cam.manualSensor?'YES':'not advertised'}\nISO: ${cam.isoMin}–${cam.isoMax}\nExposure: ${cam.shutterMinUs}–${cam.shutterMaxUs} µs\nFocus: 0–${cam.focusMax} diopters\nZoom: ${cam.zoomMin}–${cam.zoomMax}x${cam.zoomRatioApi?" (logical optical switching possible)":" (digital crop)"}\nTorch: ${cam.flash?'yes':'no'}${cam.physical?'\nPhysical lens: firmware may restrict output':''}`;
+ $('iso').min=cam.isoMin; $('iso').max=cam.isoMax;
+ $('shutterUs').min=cam.shutterMinUs; $('shutterUs').max=cam.shutterMaxUs;
+ $('focus').max=cam.focusMax; $('zoom').min=cam.zoomMin; $('zoom').max=cam.zoomMax;
+ $('manualExposure').disabled=!cam.manualSensor;
+ $('manualFocus').disabled=cam.focusMax<=0;
+ $('torch').disabled=!cam.flash;
+ for(const opt of $('awbMode').options)opt.disabled=!cam.awbModes.includes(Number(opt.value));
+}
+async function populate(){
+ cameras=await api('/api/cameras'); $('camera').replaceChildren();
+ for(const c of cameras){const o=document.createElement('option');o.value=c.id;o.textContent=c.label;$('camera').appendChild(o);}
+ $('camera').addEventListener('change',updateCameraInfo);
+}
+function showValue(){ $('focusVal').textContent=Number($('focus').value).toFixed(2); $('zoomVal').textContent=Number($('zoom').value).toFixed(2)+'x'; $('qualityVal').textContent=$('quality').value; }
+function currentControls(){
+ const obj={};
+ for(const key of ['iso','shutterUs','focus','zoom','quality','awbMode'])obj[key]=$(key).value;
+ for(const key of ['manualExposure','manualFocus','aeLock','awbLock','torch'])obj[key]=$(key).checked;
+ return obj;
+}
+async function apply(){try{await api('/api/set',currentControls(),'POST');$('error').textContent='';}catch(e){err(e);}}
+let debounce;
+for(const key of ['focus','zoom','quality']) $(key).addEventListener('input',()=>{showValue();clearTimeout(debounce);debounce=setTimeout(apply,180);});
+for(const key of ['manualExposure','manualFocus','aeLock','awbLock','torch','awbMode'])$(key).addEventListener('change',apply);
+$('apply').onclick=apply;
+$('switch').onclick=async()=>{try{await api('/api/camera',{id:$('camera').value,width:$('width').value},'POST');setTimeout(reconnect,850);}catch(e){err(e);}};
+$('reconnect').onclick=reconnect;
+$('rotation').onchange=()=>{$('video').style.transform='rotate('+$('rotation').value+'deg)';};
+async function saveImage(path, filename){
+ try{const r=await fetch(q(path),{cache:'no-store'});if(!r.ok)throw new Error(await r.text());const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);$('error').textContent='';}catch(e){err(e);}
+}
+$('shot').onclick=()=>saveImage('/photo','wificam_full_'+Date.now()+'.jpg');
+$('previewshot').onclick=()=>saveImage('/snapshot','wificam_preview_'+Date.now()+'.jpg');
+async function poll(){
+ try{
+ const s=await api('/api/state');
+ $('status').textContent=`${s.status} | ${s.videoWidth}×${s.videoHeight} stream | ${s.photoWidth}×${s.photoHeight} still | frames ${s.frames} | photos ${s.photos}`;
+ $('error').textContent=s.error || '';
+ if(!haveLoaded){
+  haveLoaded=true; currentSelection=s.selected; $('camera').value=s.selected; $('width').value=s.requestedWidth;
+  updateCameraInfo();
+  for(const key of ['iso','shutterUs','focus','zoom','quality','awbMode'])$(key).value=s[key];
+  for(const key of ['manualExposure','manualFocus','aeLock','awbLock','torch'])$(key).checked=s[key];
+  showValue();
+ }
+ }catch(e){err(e);}
+}
+(async()=>{try{await populate();await poll();reconnect();}catch(e){err(e);}setInterval(poll,1500);})();
+</script></body></html>
