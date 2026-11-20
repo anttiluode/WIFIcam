@@ -1,7 +1,5 @@
 # WIFIcam
 
-![pic1](webcam.png)
-
 **Use an Android phone as a wireless camera, with full control from a Windows PC.**
 
 WIFIcam is a lightweight Android app with a local Wi-Fi camera server. Watch the live preview, switch available cameras, adjust zoom, focus, ISO, shutter speed and white balance, and save photos from either the **WIFIcam Desktop GUI** or a web browser.
