@@ -67,15 +67,36 @@ public class MainActivity extends Activity {
         else { status.setText("Allow Camera permission to start."); requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST); }
     }
 
+    private static final String PREFS_NAME = "wificam_preferences";
+    private static final String TOKEN_KEY = "control_token";
+
+    /**
+     * A camera calibration session must survive activity recreation.
+     * Keep the 160-bit LAN access token stable until app data is cleared.
+     */
+    private String getOrCreateToken() {
+        android.content.SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String token = prefs.getString(TOKEN_KEY, null);
+        if (token != null && token.matches("[0-9a-f]{40}")) return token;
+
+        byte[] bytes = new byte[20];
+        new SecureRandom().nextBytes(bytes);
+        StringBuilder generated = new StringBuilder(40);
+        for (byte b : bytes) generated.append(String.format(java.util.Locale.US, "%02x", b & 0xff));
+        token = generated.toString();
+        // Commit synchronously before advertising the URL to another device.
+        if (!prefs.edit().putString(TOKEN_KEY, token).commit()) {
+            throw new IllegalStateException("Cannot persist WIFIcam access token");
+        }
+        return token;
+    }
+
     private void startCamera() {
         if (engine != null) return;
         try {
             engine = new CameraEngine(this);
-            byte[] bytes = new byte[20];
-            new SecureRandom().nextBytes(bytes);
-            StringBuilder token = new StringBuilder();
-            for (byte b : bytes) token.append(String.format(java.util.Locale.US, "%02x", b & 0xff));
-            server = new LocalServer(this, engine, token.toString(), 8765);
+            String token = getOrCreateToken();
+            server = new LocalServer(this, engine, token, 8765);
             server.start();
             String ip = findLocalIp();
             link = "http://" + ip + ":8765/?token=" + token;

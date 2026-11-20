@@ -11,7 +11,7 @@ A **native Android Camera2** camera server. Open a browser on a Windows computer
 - **Full-resolution still JPEGs** on `/photo` (largest supported JPEG size <= 16 MP if available), independent of preview quality.
 - Manual ISO, exposure time in microseconds, focus distance in diopters, focus/exposure automation, AE/AWB locks, available white-balance presets, torch and zoom; on Android 11+ where exposed, the logical camera uses `CONTROL_ZOOM_RATIO` for possible ultrawide/tele lens switching, with crop-based fallback on older devices.
 - Local HTTP API and zero-dependency `pc_client.py` for repeated optical calibration captures.
-- **Random 160-bit access token**, required for every HTTP endpoint.
+- **Persistent random 160-bit access token**, generated once and stored in private Android app preferences; required for every HTTP endpoint. It survives activity restarts and app updates, and resets only when app storage is cleared or the app is uninstalled.
 
 **Caveats:** Not all Android cameras offer MANUAL_SENSOR; the UI tells you whether it is advertised. Physical child cameras are not guaranteed to be individually usable, and some selections may fail. Manual focus/ISO/exposure are requested through Camera2; actual applied metadata has not yet been verified on an S20. JPEG photos are sensor-native orientation. This app must remain **open in foreground with the screen on**; it does not operate as a background service. The stream is MJPEG over HTTP, not lossless raw, H.264, or video recording.
 
@@ -23,7 +23,7 @@ A **native Android Camera2** camera server. Open a browser on a Windows computer
 2. Download the `WIFIcam-debug-apk` artifact ZIP and extract `app-debug.apk`.
 3. Transfer the APK to your S20. Allow installation from the file manager/source you used, install WIFIcam, and grant Camera permission.
 4. Connect the phone and PC to the **same Wi-Fi**, and keep WIFIcam open on the phone.
-5. The phone displays a URL such as `http://192.168.1.157:8765/?token=...`. Open **the exact URL** in your PC browser. Port `8765` is **not** IP Webcam's `8080`.
+5. The phone displays a URL such as `http://192.168.1.157:8765/?token=...`. Open **the exact URL** in your PC browser. Port `8765` is **not** IP Webcam's `8080`. The token is stable across app restarts, but the Wi-Fi IP address can still change.
 
 The workflow builds a **debug APK**, not a signed Play Store release. GitHub Actions must be enabled for the repository.
 
