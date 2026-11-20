@@ -12,9 +12,9 @@ WIFIcam is a lightweight Android app with a local Wi-Fi camera server. Watch the
 
 **[⬇ Download WIFIcam APK for Android](https://raw.githubusercontent.com/anttiluode/WIFIcam/main/app-debug.apk)**
 
-The APK is already included in this repository as [`app-debug.apk`](app-debug.apk). Open the link on your Android phone, download the file, then tap the APK to install. Android may ask you to allow installs from your browser or Files app. Grant the Camera permission when WIFIcam starts.
+The APK is available in this repository as [`app-debug.apk`](app-debug.apk). Open the download link on your Android phone, then tap the APK to install. Android may ask you to allow installs from your browser or Files app. Grant Camera permission when WIFIcam starts.
 
-> This is a **debug-signed APK for direct installation**, not a Play Store build. The checked-in APK is a snapshot; if Android source has changed since it was uploaded, use the latest successful build from [GitHub Actions](../../actions/workflows/android.yml) (download the `WIFIcam-debug-apk` ZIP and extract the APK).
+> This is a **debug-signed APK for direct installation**, not a Play Store build. A successful [Android build](https://github.com/anttiluode/WIFIcam/actions/workflows/android.yml) automatically refreshes the APK in `main`. If a build is still running, you can also download the `WIFIcam-debug-apk` ZIP artifact from the latest successful workflow run and extract the APK. Debug builds from different runs may use different signing keys; if Android rejects an update, uninstall the previous debug build before installing the new one (uninstalling resets the saved token).
 
 ### 2. Control the camera from Windows
 
@@ -84,6 +84,6 @@ Manual focus `0` means infinity (not a nearby object); higher diopter values foc
 
 ## Build the Android app yourself
 
-The Android source lives under `app/`. Build it with Android Studio or Gradle 8.9, Java 17, Android Gradle Plugin 8.7.3 and SDK 35. The GitHub [Build Android APK workflow](../../actions/workflows/android.yml) builds a new debug APK when `main` changes; download its `WIFIcam-debug-apk` artifact from a successful run. If you modify the Android source, the already-committed root `app-debug.apk` **does not update automatically**.
+The Android source lives under `app/`. Build it with Android Studio or Gradle 8.9, Java 17, Android Gradle Plugin 8.7.3 and SDK 35. The GitHub [Build Android APK workflow](https://github.com/anttiluode/WIFIcam/actions/workflows/android.yml) builds a new debug APK when `main` changes, uploads the `WIFIcam-debug-apk` artifact, and updates the root `app-debug.apk` on a successful build. If a build fails or has not finished yet, the root APK remains the previous version.
 
 MIT licensed. See [`LICENSE`](LICENSE).
