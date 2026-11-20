@@ -15,6 +15,17 @@ A **native Android Camera2** camera server. Open a browser on a Windows computer
 
 **Caveats:** Not all Android cameras offer MANUAL_SENSOR; the UI tells you whether it is advertised. Physical child cameras are not guaranteed to be individually usable, and some selections may fail. Manual focus/ISO/exposure are requested through Camera2; actual applied metadata has not yet been verified on an S20. JPEG photos are sensor-native orientation. This app must remain **open in foreground with the screen on**; it does not operate as a background service. The stream is MJPEG over HTTP, not lossless raw, H.264, or video recording.
 
+## Windows desktop control panel (NEW)
+
+You can use the browser dashboard by opening the complete phone URL, **or** run the dedicated Tkinter GUI on Windows 10/11, with a large live preview, camera/lens dropdown, 0.5×/1×/2×/3×/5× quick zoom, manual ISO/shutter, focus slider, white balance, torch, full-resolution JPEG and burst controls.
+
+1. Download or clone this repository and open the `WIFIcam` folder on Windows.
+2. Double-click **`INSTALL_GUI.bat`** once (installs Pillow for JPEG preview).
+3. Double-click **`LAUNCH_GUI.bat`** to open the desktop window.
+4. Paste the complete URL shown on the S20 (including `?token=...`) into the top field, click **Connect**. The PC GUI remembers it in `%APPDATA%\\WIFIcam\\desktop.json` (keep this private).
+
+You do not need a new APK for the desktop GUI: it uses the current phone server and `/snapshot`, `/photo`, and `/api/set` endpoints. The preview is polled JPEG snapshots, not a raw stream. Some zoom or lens choices may be digital or unavailable depending on Camera2 and Samsung firmware. See `GUI_README.txt` for more details. No other Python dependencies beyond Pillow.
+
 ## Build / install
 
 ### Easiest: GitHub Actions APK
