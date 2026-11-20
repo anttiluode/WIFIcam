@@ -1,13 +1,20 @@
 name: Build Android APK
+
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
+
+# Build only the latest commit when several changes land close together.
+concurrency:
+  group: wificam-android-main
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -22,9 +29,24 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Assemble debug APK
+      - name: Assemble Android APK
         run: gradle --no-daemon assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: WIFIcam-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+      # Keep the simple download link to /main/app-debug.apk current.
+      # Commits made with GITHUB_TOKEN do not start another push workflow.
+      - name: Update downloadable APK in main
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk app-debug.apk
+          if git diff --quiet -- app-debug.apk; then
+            echo 'APK unchanged'
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add app-debug.apk
+            git commit -m 'build: refresh downloadable Android APK [skip ci]'
+            git push origin HEAD:main
+          fi
